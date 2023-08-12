@@ -1,0 +1,8 @@
+{
+  "baseUrl": "/modules",
+  "modules": [
+    { "module": "tty", "filename": "tty.js", "dependencies": [] },
+    { "module": "net", "filename": "net.js", "dependencies": ["base.js"] },
+    { "module": "base", "filename": "base.js", "dependencies": [] }
+  ]
+}
