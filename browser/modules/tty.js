@@ -1,3 +1,0 @@
-//
-// System startup terminal module
-//
