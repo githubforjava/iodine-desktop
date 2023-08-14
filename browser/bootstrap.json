@@ -4,8 +4,7 @@
   "modules": {
     "launchd": {
       "type": "application/javascript",
-      "filename": "launchd.js",
-      "dependencies": ["net", "global_style"]
+      "filename": "launchd.js"
     },
     "global_style": {
       "type": "text/css",
@@ -13,13 +12,11 @@
     },
     "net": {
       "type": "application/javascript",
-      "filename": "net.js",
-      "dependencies": ["base"]
+      "filename": "net.js"
     },
     "base": {
       "type": "application/javascript",
-      "filename": "base.js",
-      "dependencies": []
+      "filename": "base.js"
     }
   }
 }

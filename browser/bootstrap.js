@@ -71,7 +71,7 @@
     }
 
     async downloadModules() {
-      for (const moduleId of this.getModulesId()) {
+      for (const moduleId of Object.keys(this.modules)) {
         const modInfo = this.modules[moduleId]
 
         modInfo.text = await fetch(`${this.baseUrl}/${modInfo.filename}`, {
@@ -79,17 +79,6 @@
           headers: { Accept: modInfo.type }
         }).then((res) => res.text())
       }
-    }
-
-    getModulesId() {
-      const list = new Set()
-      for (const id in this.modules) {
-        list.add(id)
-
-        for (const depId of this.modules[id].dependencies || []) list.add(depId)
-      }
-
-      return list
     }
 
     ensureModuleAvailability(id) {
