@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "esnext" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ] /* Specify a set of bundled library declaration files that describe the target runtime environment. */,
+    "experimentalDecorators": true /* Enable experimental support for legacy experimental decorators. */,
+    "module": "esnext" /* Specify what module code is generated. */,
+    "baseUrl": "./src",
+    "paths": {
+      "iodine/*": ["./*"]
+    },
+    "typeRoots": ["./src/@types"],
+    "moduleResolution": "node" /* Specify how TypeScript looks up a file from a given module specifier. */,
+    "allowUmdGlobalAccess": true /* Allow accessing UMD globals from modules. */,
+    "importHelpers": true /* Allow importing helper functions from tslib once per project, instead of including them per-file. */,
+    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "strict": true /* Enable all strict type-checking options. */,
+    "strictPropertyInitialization": true /* Check for class properties that are declared but not set in the constructor. */,
+    "useUnknownInCatchVariables": true /* Default catch clause variables as 'unknown' instead of 'any'. */,
+    "alwaysStrict": true /* Ensure 'use strict' is always emitted. */,
+    "noFallthroughCasesInSwitch": true /* Enable error reporting for fallthrough cases in switch statements. */,
+    "noImplicitOverride": true /* Ensure overriding members in derived classes are marked with an override modifier. */,
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */
+  }
+}
