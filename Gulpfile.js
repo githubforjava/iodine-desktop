@@ -1,10 +1,13 @@
-const { parallel, src, dest, task, series } = require('gulp');
+const { parallel, src, dest, task, series, watch } = require('gulp');
 const rename = require('gulp-rename');
 const sass = require('gulp-sass')(require('sass'));
 const rimraf = require('gulp-rimraf');
+const sharp = require('sharp');
+const through = require('through2');
+const gulpCopy = require('gulp-copy');
 const { glob } = require('glob');
 const path = require('node:path');
-const { writeFile } = require('node:fs/promises');
+const { writeFile, copyFile, constants } = require('node:fs/promises');
 const { rollup } = require('rollup');
 
 const configPaths = {
@@ -16,7 +19,8 @@ const configPaths = {
   manifest: 'bootstrap.json',
   dest: 'browser',
   /** src/modules output folder in the destination folder */
-  modules: 'modules'
+  modules: 'modules',
+  assets: 'assets'
 };
 
 task('bootstrap:css', () => {
@@ -45,6 +49,38 @@ task('bootstrap:js', async () => {
     sourcemap: false
   });
 });
+
+task(
+  'bootstrap:assets',
+  parallel(
+    // Image assets
+    function bootstrap_imageAssets() {
+      return src('src/assets/**/*.{png,svg,jpg,jpeg,webp}')
+        .pipe(
+          through.obj(async (file, _, done) => {
+            file.contents = await sharp(file.contents)
+              .webp({ quality: 80 })
+              .toBuffer();
+            return done(null, file);
+          })
+        )
+        .pipe(
+          rename((outPath) => {
+            outPath.extname = '.webp';
+          })
+        )
+        .pipe(dest(`${configPaths.dest}/${configPaths.assets}`));
+    },
+    // Non image assets
+    function bootstrap_miscAssets() {
+      return src('src/assets/**/*.{woff,ttf,woff2,mp3,mp4,m4a}').pipe(
+        gulpCopy(`${configPaths.dest}/${configPaths.assets}`, {
+          prefix: 2
+        })
+      );
+    }
+  )
+);
 
 task('bootstrap:generate-manifest', async () => {
   const patterns = [configPaths.js.modules, configPaths.css];
@@ -98,6 +134,19 @@ task(
     parallel(
       task('bootstrap:css'),
       task('bootstrap:js'),
+      task('bootstrap:assets'),
+      task('bootstrap:generate-manifest')
+    )
+  )
+);
+
+task('bootstrap:watch', () =>
+  watch(
+    'src/**/*',
+    parallel(
+      task('bootstrap:css'),
+      task('bootstrap:js'),
+      task('bootstrap:assets'),
       task('bootstrap:generate-manifest')
     )
   )

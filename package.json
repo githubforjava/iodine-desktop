@@ -9,6 +9,7 @@
   "private": true,
   "scripts": {
     "build": "gulp bootstrap",
+    "watch": "gulp bootstrap:watch",
     "start": "serve browser"
   },
   "devDependencies": {
@@ -18,13 +19,19 @@
     "@rollup/plugin-typescript": "^11.1.2",
     "glob": "^10.3.3",
     "gulp": "^4.0.2",
+    "gulp-copy": "^4.0.1",
     "gulp-rename": "^2.0.0",
     "gulp-rimraf": "^1.0.0",
     "gulp-sass": "^5.1.0",
     "rollup": "^3.28.0",
     "sass": "^1.65.1",
     "serve": "13.0.0",
+    "sharp": "^0.32.4",
+    "through2": "^4.0.2",
     "tslib": "^2.6.1",
     "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "lit": "^2.8.0"
   }
 }
