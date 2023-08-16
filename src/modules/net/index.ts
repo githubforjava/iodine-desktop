@@ -6,7 +6,16 @@ const { Disposable } = kern_require<typeof Common>('common');
 
 interface XHRAdapterInit {
   method: string;
+  responseType: XMLHttpRequestResponseType;
   headers: Record<string, string>;
+}
+
+interface XHRResponseMap extends Record<XMLHttpRequestResponseType, any> {
+  arraybuffer: ArrayBuffer;
+  json: 'string';
+  text: string;
+  document: Document;
+  blob: Blob;
 }
 
 /**
@@ -14,12 +23,12 @@ interface XHRAdapterInit {
  */
 class XHRAdapter extends Disposable {
   xhr: XMLHttpRequest;
-  _headers: Record<string, string>;
-  _contentLength;
+  protected _headers: Record<string, string>;
+  protected _contentLength;
 
   constructor(
     url: string | URL,
-    { method = 'GET', headers = {} }: XHRAdapterInit
+    { method, responseType, headers }: XHRAdapterInit
   ) {
     super();
 
@@ -27,6 +36,7 @@ class XHRAdapter extends Disposable {
     this._contentLength = NaN;
     this.xhr = new XMLHttpRequest();
     this.xhr.open(method, url);
+    this.xhr.responseType = responseType;
 
     for (const key in headers) {
       this._headers[key] = headers[key];
@@ -51,8 +61,8 @@ class XHRAdapter extends Disposable {
   }
 
   /** @virtual */
-  send(): Promise<XMLHttpRequest> {
-    return Promise.resolve(this.xhr);
+  send(): Promise<XHRResponseMap['text']> {
+    return Promise.resolve(this.xhr.responseText);
   }
 
   override dispose() {
@@ -65,18 +75,22 @@ class XHRAdapter extends Disposable {
   }
 }
 
-class XHRHead extends XHRAdapter {
-  constructor(url: string | URL, headers: Record<string, string>) {
-    super(url, { method: 'HEAD', headers });
+class XHRHead<T extends XMLHttpRequestResponseType> extends XHRAdapter {
+  constructor(
+    url: string | URL,
+    responseType: XMLHttpRequestResponseType,
+    headers: Record<string, string>
+  ) {
+    super(url, { method: 'HEAD', responseType, headers });
   }
 
-  override send(): Promise<XMLHttpRequest> {
+  override send(): Promise<XHRResponseMap[T]> {
     return new Promise((resolve, reject) => {
       this.xhr.addEventListener('readystatechange', () => {
         if (this.xhr.readyState < this.xhr.HEADERS_RECEIVED) return;
 
         // everything is good?
-        if (this.validateHeaders()) return resolve(this.xhr);
+        if (this.validateHeaders()) return resolve(this.xhr.response);
 
         reject(
           `invalid responseType, expected ${
@@ -91,12 +105,16 @@ class XHRHead extends XHRAdapter {
   }
 }
 
-class XHRGet extends XHRAdapter {
-  constructor(url: string | URL, headers: Record<string, string>) {
-    super(url, { method: 'GET', headers });
+class XHRGet<T extends XMLHttpRequestResponseType> extends XHRAdapter {
+  constructor(
+    url: string | URL,
+    responseType: XMLHttpRequestResponseType,
+    headers: Record<string, string>
+  ) {
+    super(url, { method: 'GET', responseType, headers });
   }
 
-  override send(): Promise<XMLHttpRequest> {
+  override send(): Promise<XHRResponseMap[T]> {
     const { HEADERS_RECEIVED, DONE } = this.xhr;
 
     return new Promise((resolve, reject) => {
@@ -115,7 +133,7 @@ class XHRGet extends XHRAdapter {
 
           case DONE:
             if (this.xhr.status >= 400) reject(this.xhr.responseText);
-            else resolve(this.xhr);
+            else resolve(this.xhr.response);
 
             this.dispose();
             return;

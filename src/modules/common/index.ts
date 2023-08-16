@@ -3,7 +3,7 @@
 //
 
 class Disposable {
-  _disposed;
+  protected _disposed;
 
   constructor() {
     this._disposed = false;
@@ -21,6 +21,7 @@ class Disposable {
   }
 }
 
-const $exports = (kern_module.exports = { Disposable });
+import * as third_party from './third_party';
+const $exports = (kern_module.exports = { Disposable, third_party });
 
 export type { $exports as default };

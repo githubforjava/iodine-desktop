@@ -7,6 +7,7 @@ const { default: nodeResolve } = require('@rollup/plugin-node-resolve');
 const { default: commonjs } = require('@rollup/plugin-commonjs');
 const { default: typescript } = require('@rollup/plugin-typescript');
 const { default: terser } = require('@rollup/plugin-terser');
+const { default: minifyHTML } = require('rollup-plugin-minify-html-literals');
 const path = require('node:path');
 
 module.exports = (globMatches) => {
@@ -25,6 +26,7 @@ module.exports = (globMatches) => {
     plugins: [
       nodeResolve({ browser: true }),
       commonjs({ sourceMap: false }),
+      minifyHTML(),
       typescript(),
       terser()
     ]

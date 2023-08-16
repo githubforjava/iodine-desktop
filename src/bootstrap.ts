@@ -15,22 +15,29 @@
   }
 
   try {
-    main(fatal);
+    main(afterDOMContentLoaded, fatal);
   } catch (e) {
     fatal(e instanceof Error ? e.message : (e as string));
   }
 
   function fatal(msg: string | Error) {
-    if (document.readyState !== 'loading') {
-      document.getElementById('error')!.textContent = msg.toString();
-      return;
-    }
+    afterDOMContentLoaded(function () {
+      var el = document.getElementById('error');
 
-    document.addEventListener('DOMContentLoaded', function () {
-      document.getElementById('error')!.textContent = msg.toString();
+      if (!el) return;
+      el.textContent = msg.toString();
     });
   }
-})(function (fatal: (msg: Error | string) => void) {
+
+  function afterDOMContentLoaded(fn: () => void) {
+    if (document.readyState === 'interactive') {
+      document.addEventListener('DOMContentLoaded', fn, { once: true });
+    } else fn();
+  }
+})(function (
+  afterDOMContentLoaded: (fn: () => void) => void,
+  fatal: (msg: Error | string) => void
+) {
   'use strict';
 
   const kModuleManifestURL = '/bootstrap.json';
@@ -52,7 +59,19 @@
     async setModuleLoader(loader: Module) {
       await this.downloadModules();
 
-      loader.executeKernelScript(this.entryModuleId);
+      afterDOMContentLoaded(() => {
+        const dummy = document.getElementById('dummy')!;
+        document.getElementById('error')!.remove();
+
+        dummy.addEventListener(
+          'click',
+          () => {
+            dummy.remove();
+            loader.executeKernelScript(this.entryModuleId);
+          },
+          { once: true }
+        );
+      });
     }
 
     validateManifest(manifest: Record<string, any>) {
@@ -149,7 +168,11 @@
       };
     }
 
-    /** execute privileged script, without any limitation */
+    /**
+     * **Expensive call**
+     *
+     * execute privileged script, without any limitation
+     */
     executeKernelScript(id: string) {
       const mainFn = new Function(
         'kern_module',
