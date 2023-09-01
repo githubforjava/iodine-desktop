@@ -10,32 +10,50 @@
     eval('async function _start() {}');
   } catch (_) {
     fatal(
-      'error: incompatible browser, consider updating your browser to the latest version'
+      'incompatible browser, consider updating your browser to the latest version'
     );
   }
 
   try {
-    main(afterDOMContentLoaded, fatal);
+    useDOMElement('power_on', function (btn) {
+      btn.textContent = 'Loading...';
+    });
+
+    main(useDOMElement, fatal);
   } catch (e) {
     fatal(e instanceof Error ? e.message : (e as string));
   }
 
   function fatal(msg: string | Error) {
-    afterDOMContentLoaded(function () {
-      var el = document.getElementById('error');
-
-      if (!el) return;
+    useDOMElement('error', function (el) {
       el.textContent = msg.toString();
+      console.error('fatal: ' + msg);
+    });
+  }
+
+  function useDOMElement(id: string, job: (elem: HTMLElement) => void) {
+    afterDOMContentLoaded(function () {
+      var elem = document.getElementById(id);
+
+      if (!elem) {
+        console.error('Could not find element #' + id);
+        return;
+      }
+
+      job(elem);
     });
   }
 
   function afterDOMContentLoaded(fn: () => void) {
-    if (document.readyState === 'interactive') {
-      document.addEventListener('DOMContentLoaded', fn, { once: true });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function local() {
+        document.removeEventListener('DOMContentLoaded', local);
+        fn();
+      });
     } else fn();
   }
 })(function (
-  afterDOMContentLoaded: (fn: () => void) => void,
+  useDOMElement: (id: string, job: (elem: HTMLElement) => void) => void,
   fatal: (msg: Error | string) => void
 ) {
   'use strict';
@@ -59,14 +77,14 @@
     async setModuleLoader(loader: Module) {
       await this.downloadModules();
 
-      afterDOMContentLoaded(() => {
-        const dummy = document.getElementById('dummy')!;
-        document.getElementById('error')!.remove();
+      useDOMElement('power_on', (btn) => {
+        document.getElementById('error')?.remove();
 
-        dummy.addEventListener(
+        btn.textContent = 'Power On';
+        btn.addEventListener(
           'click',
           () => {
-            dummy.remove();
+            btn.remove();
             loader.executeKernelScript(this.entryModuleId);
           },
           { once: true }
