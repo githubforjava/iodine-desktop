@@ -6,76 +6,15 @@ import type Net from 'iodine/modules/net';
 import type Common from 'iodine/modules/common';
 
 const { XHRGet } = kern_require<typeof Net>('net');
-const { LitElement, css, html, unsafeCSS, customElement, createRef, ref } =
+const { LitElement, html, unsafeCSS, customElement, createRef, ref } =
   kern_require<typeof Common>('common').third_party;
 
 const globalStyleElement = kern_require<HTMLStyleElement>('global_style');
+const bootstrapStyleElement = kern_require<HTMLStyleElement>('bootstrap_style');
 
 @customElement('boot-screen')
 class BootScreen extends LitElement {
-  static override styles = css`
-    ${unsafeCSS(globalStyleElement.innerHTML)}
-
-    .boot-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px 0;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .boot-img {
-      width: 140px;
-      height: 192px;
-      margin-bottom: 20px;
-      transform: perspective(40px) rotate3d(0, 1, 0, 10deg) translateZ(45px);
-      opacity: 0;
-    }
-
-    .boot-img.show {
-      animation: showLogo 1s 1s ease-out forwards;
-    }
-
-    @keyframes showLogo {
-      from {
-        opacity: 1;
-      }
-      to {
-        opacity: 1;
-        transform: perspective(70px) rotate3d(0, 1, 0, 0deg) translateZ(0px);
-      }
-    }
-
-    .boot-img img {
-      width: 100%;
-      height: 100%;
-      filter: invert(1);
-      -webkit-filter: invert(1);
-      object-fit: contain;
-    }
-
-    .boot-progress {
-      width: 280px;
-      height: 5px;
-      border: 1px solid rgba(240, 240, 240, 0.3);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .boot-progress-bar {
-      width: 0;
-      height: 100%;
-      background-color: rgb(240, 240, 240);
-    }
-
-    .boot-msg {
-      color: rgb(200, 200, 200);
-      font-size: 14px;
-    }
-  `;
+  static override styles = unsafeCSS(bootstrapStyleElement.innerHTML);
 
   private objectURLs: string[];
 
